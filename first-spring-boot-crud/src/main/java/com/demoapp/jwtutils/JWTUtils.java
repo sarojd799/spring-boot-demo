@@ -4,8 +4,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import com.demoapp.application.CustomProperties;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -16,15 +20,27 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class JWTUtils {
 
 	private String jwtSecret = "somesecret";
-
+	
+	@Autowired
+	private CustomProperties appProperties;
+	
 	/**
 	 * @description
 	 */
-	public String generateJwtToken(UserDetails userDetails) {
+	public String generateJwtToken(String username) {
+		
 		Map<String, Object> claims = new HashMap<>();
-		return Jwts.builder().setClaims(claims).setSubject(userDetails.getUsername())
+		return Jwts.builder().setClaims(claims).setSubject(username)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() +  10 * 60 * 1000))
+				.setExpiration(new Date(System.currentTimeMillis() +  appProperties.getTimeout()))
+				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
+	}
+	
+	public String generateRefreshToken(String username) {
+		Map<String, Object> claims = new HashMap<>();
+		return Jwts.builder().setClaims(claims).setSubject(username)
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() +  appProperties.getTimeout()+ appProperties.getRefreshTimeout()))
 				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
 	}
 
@@ -45,4 +61,5 @@ public class JWTUtils {
 		final Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
 		return claims.getSubject();
 	}
+	
 }

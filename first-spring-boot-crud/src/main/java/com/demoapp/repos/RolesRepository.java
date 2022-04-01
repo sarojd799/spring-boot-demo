@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import com.demoapp.dto.RoleDTO;
 
 @Repository
-public interface RolesRepository extends CrudRepository<RoleDTO, Integer> {}
+public interface RolesRepository extends CrudRepository<RoleDTO, Integer> {
+	public abstract RoleDTO findByRoleName(String roleName);
+}
 
 

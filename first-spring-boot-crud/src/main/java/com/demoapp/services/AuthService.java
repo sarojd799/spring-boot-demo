@@ -1,8 +1,7 @@
 package com.demoapp.services;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +9,10 @@ import org.springframework.stereotype.Service;
 
 import com.demoapp.dto.AuthDTO;
 import com.demoapp.dto.RoleDTO;
+import com.demoapp.dto.UserDetailsDTO;
 import com.demoapp.repos.AuthRepository;
 import com.demoapp.repos.RolesRepository;
+import com.demoapp.repos.UserDetailsRepository;
 
 @Service
 public class AuthService {
@@ -22,32 +23,55 @@ public class AuthService {
 	@Autowired
 	private RolesRepository rolesRepository;
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void insertLoginDetails() {
-		rolesRepository.saveAll(Arrays.asList(new RoleDTO("USER"), new RoleDTO("ADMIN")));
-		RoleDTO role = (RoleDTO) StreamSupport.stream(rolesRepository.findAll().spliterator(), false)
-				.filter(r-> r.getRoleName().equals("USER"))
-				.map(RoleDTO.class::cast)
-				.findFirst()
-				.orElse(null);
-		Set<RoleDTO> roles = new HashSet<RoleDTO>();
-		roles.add(role);
-		
-		Set<AuthDTO> auths = new HashSet<AuthDTO>();
-		AuthDTO auth = new AuthDTO();
-		auth.setUsername("test");
-		auth.setPassword("test");
-		auth.setIsActive(true);
-		auth.setUserRoles(roles);
-		auths.add(auth);
-		authRepository.saveAll(auths);
-	}
+	@Autowired
+	private UserDetailsRepository userDetailsRepository;
 	
 	public boolean validateUser(AuthDTO auth) {
-		if(authRepository.count() == 0) {
-			this.insertLoginDetails();
-		}
 		return StreamSupport.stream(authRepository.findAll().spliterator(), false)
 		 .anyMatch(d-> d.getUsername().equals(auth.getUsername()) && d.getPassword().equals(auth.getPassword()));
 	}
+	
+	public boolean existsUserWithName(String username) {
+		AuthDTO auth = authRepository.findByUsername(username);
+		return auth != null;
+	}
+	
+	public UserDetailsDTO saveNewUser(AuthDTO auth) {
+		RoleDTO role = rolesRepository.findByRoleName("USER");
+		UserDetailsDTO u = null;
+		if(role != null && auth != null) {
+			UserDetailsDTO newUserDetails = new UserDetailsDTO();
+			newUserDetails.setEmail(auth.getUsername());
+ 			u = userDetailsRepository.save(newUserDetails);
+ 			auth.setUserId(u.getUserDetailsId());
+ 			auth.setIsActive(false);
+			auth.setUserRoles(Arrays.asList(role).stream().collect(Collectors.toSet()));
+			authRepository.save(auth);
+		}
+		System.out.println("user after save"+ u);
+		return u;
+	}
+	
+	
+	public AuthDTO getUserByEmail(String email) {
+		if (email != null) {
+     		return authRepository.findByUsername(email);
+		}
+		return null;
+	}
+	
+	public boolean clearLastLoggedIn(Integer userId) {
+		if(userId != null) {
+			UserDetailsDTO u = userDetailsRepository.findByUserDetailsId(userId);
+			if(u != null) {
+				u.setLoggedIn(null);
+				userDetailsRepository.save(u);
+				return true;
+			}
+			
+		}
+		return false;
+	}
+	
+
 }

@@ -1,4 +1,4 @@
-package com.demoapp.application;
+package  com.demoapp.application;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -7,9 +7,9 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 
 import com.demoapp.filters.JWTFilter;
 import com.demoapp.services.UserDetailsUtils;
@@ -30,12 +30,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
 	private UserDetailsUtils userDetailsService;
+	
+
 
 	@Override
 	public void configure(AuthenticationManagerBuilder auth) throws Exception {
 		// `auth.inMemoryAuthentication().withUser("test").password("test").roles("USER");
 		auth.userDetailsService(userDetailsService).passwordEncoder(getPasswordEncorder());
 	}
+
 
 	
 	/*-Note: To check the different types of password encoders-*/
@@ -51,7 +54,23 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.cors().and().csrf().disable();
 
 		http.authorizeRequests()
-		   .antMatchers("/", "/home","/login","/register","/fill").permitAll()
+		   .antMatchers(
+				   "/images/**",
+				   "/login",
+				   "/api/existsUserWithName",
+				   "/registerNewUser",
+				   "/secured/**","/secured/**/**","/secured/**/**/**", "/secured/socket", "/secured/success",
+				   "/spring-security-mvc-socket/**",
+				   "/api/getAllCountries",
+				   "/api/{countryId}/getAllStatesOfCountry",
+				   "/api/{stateId}/getAllCitiesOfState",
+				   "/api/refreshToken",
+				   "/swagger-resources/**",
+	                "/swagger-ui.html",
+	                "/v2/api-docs",
+	                "/webjars/**",
+	                "/topic","/topic/**","/registerForChat","/chatEvent/**"
+		    ).permitAll()
 		   .anyRequest().authenticated()
 		   .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		

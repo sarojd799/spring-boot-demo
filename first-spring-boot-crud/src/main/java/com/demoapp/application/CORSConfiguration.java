@@ -9,16 +9,25 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Configuration
 public class CORSConfiguration {
 	
+	private String[] allowedIP = {"http://localhost:4200","http://192.168.1.20:4200"};
+	
+	private String[] globalIp = {"*"};
+	
+	private String[] allowedHTTPMethods = {"POST", "GET", "DELETE", "PUT", "OPTIONS"};
+	
 	@Bean
 	@SuppressWarnings("deprecation")	
     public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurerAdapter() {
+        
+		return new WebMvcConfigurerAdapter() {
+        	
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                 .allowedMethods("GET","POST","PUT","DELETE","HEAD")
-                 .allowedHeaders("*");
-                 //.allowedOrigins("http://localhost:4200","http://192.168.1.20:4200");
+                 .allowedMethods(allowedHTTPMethods)
+                 .allowedHeaders("*")
+                 .allowedOrigins(allowedIP)
+                 .allowCredentials(true);
             }
         };
     }
