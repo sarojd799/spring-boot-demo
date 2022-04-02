@@ -27,10 +27,6 @@ public class ConnectionsManagerService {
 	@Autowired
 	private UserDetailsRepository userDetailsRepository;
 	
-	@Autowired
-	private ActiveUserService activeUserService;
-	
-	
 	public boolean saveNewCollection(Integer userId, UserDetailsDTO u) {
 	
 		if(userId ==  null || u == null) return false;
@@ -56,7 +52,7 @@ public class ConnectionsManagerService {
 			}).collect(Collectors.toSet());
 			
 			connections.forEach(connection-> {			
-				boolean isOnline = activeUserService.existsUser(connection.getEmail());
+				boolean isOnline = ActiveUserService.existsUser(connection.getEmail());
 				if(isOnline) {
 			    	connection.setStatus("ONLINE");
 			    } else  {

@@ -23,11 +23,6 @@ public class StompHandshakeHandler extends DefaultHandshakeHandler  {
 	
 	
 	@Bean
-	public ActiveUserService getActiveUserService() {
-		return new ActiveUserService();
-	}
-	
-	@Bean
 	public JWTUtils getTokenManager() {
 		return new JWTUtils();
 	}
@@ -37,21 +32,6 @@ public class StompHandshakeHandler extends DefaultHandshakeHandler  {
     @Override
     protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
         // Generate principal with UUID as name
-    	String userId = UUID.randomUUID().toString();
-    	try {
-        	ActiveUserService service = getActiveUserService();
-        	String[] cookies = request.getHeaders().getFirst("Cookie").split(";");
-        	System.out.println("cookie:"+request.getHeaders().getFirst("Cookie"));
-        	String sessionCookie = cookies[1];
-        	String sessionId = sessionCookie.substring(12, sessionCookie.length());
-        	String userName = getTokenManager().getUsernameFromToken(sessionId);
-        	service.addUser(userName, userId);
-        	System.out.println("user name "+userName);
-    	} catch(Exception e) {
-    		System.out.println("Exception caught :"+e.getLocalizedMessage());
-    	}
-    	System.out.println("random-id"+userId);
-    	
-    	return new StompPrincipal(userId);    	
+    	return new StompPrincipal(UUID.randomUUID().toString());    	
     }
 }

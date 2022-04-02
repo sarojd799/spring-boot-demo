@@ -27,8 +27,6 @@ public class ChatController {
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 	
-	@Autowired
-	private ActiveUserService activeUserService;
 	
 	@Autowired
 	private ChatService chatService;
@@ -39,11 +37,25 @@ public class ChatController {
 		
 		System.out.println("Intercepted message"+message);
 		chatService.saveMessage(message);
-		String receipent = activeUserService.getPrincipal(message.getReceipent());
+		String receipent = ActiveUserService.getPrincipal(message.getReceipent());
 		System.out.println("receipent"+receipent);
-		System.out.println("prin "+simp.getUser().getName());
+		System.out.println("activeUsers "+ActiveUserService.getAllRegisteredUsers());
+		
 		if(receipent != null) {
-			simpMessagingTemplate.convertAndSendToUser(simp.getUser().getName(), "/queue/message", message); 
+			simpMessagingTemplate.convertAndSendToUser(receipent, "/queue/message", message); 
+		}
+		
+	}
+	
+	@MessageMapping("/registerForChat")
+	public void registerForChat(SimpMessageHeaderAccessor simp, @Payload MessageDTO message,Principal user,  @Header("simpSessionId") String sessionId) throws Exception {
+		
+		System.out.println("Intercepted register"+message);
+		String sender = message.getSender();
+		System.out.println("sender"+sender);
+		if(sender != null) {
+			ActiveUserService.addUser(sender, simp.getUser().getName());
+			simpMessagingTemplate.convertAndSendToUser(simp.getUser().getName(), "/queue/message", "Registered"); 
 		}
 		
 	}
@@ -51,7 +63,7 @@ public class ChatController {
 	
 	@MessageMapping("/chatEvent/type")
 	public void onUserKeyup(SimpMessageHeaderAccessor simp, @Payload MessageDTO message,Principal user,  @Header("simpSessionId") String sessionId) throws Exception {
-        String receipent = activeUserService.getPrincipal(message.getReceipent());
+        String receipent = ActiveUserService.getPrincipal(message.getReceipent());
         if(receipent != null) {
         	simpMessagingTemplate.convertAndSendToUser(receipent, "queue/keyup", message); 
         }
@@ -59,9 +71,9 @@ public class ChatController {
 	
 	@MessageMapping("/chatEvent/blur")
 	public void onUserBlur(SimpMessageHeaderAccessor simp, @Payload MessageDTO message,Principal user,  @Header("simpSessionId") String sessionId) throws Exception {
-		String receipent = activeUserService.getPrincipal(message.getReceipent());
+		String receipent = ActiveUserService.getPrincipal(message.getReceipent());
         if(receipent != null) {
-        	simpMessagingTemplate.convertAndSendToUser(activeUserService.getPrincipal(message.getReceipent()), "queue/blur", message);
+        	simpMessagingTemplate.convertAndSendToUser(ActiveUserService.getPrincipal(message.getReceipent()), "queue/blur", message);
         }
 	}
 	
