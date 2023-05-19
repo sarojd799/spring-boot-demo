@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "app.timeout",
+    "type": "java.lang.String",
+    "description": "A description for 'app.timeout'"
+  },
+  {
+    "name": "refresh-token.margin",
+    "type": "java.lang.String",
+    "description": "A description for 'refresh-token.margin'"
+  },
+  {
+    "name": "app.refresh-token.margin",
+    "type": "java.lang.String",
+    "description": "A description for 'app.refresh-token.margin'"
+  }
+]}

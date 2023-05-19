@@ -1,0 +1,47 @@
+
+
+1. If you are getting 403 in the response then try removing cors
+2. If you want to remove the default spring login page then configure springSecurity configure adapter to permit all request you want.
+3. For hibernate to work in jpa projects use
+4. Exception handler classes must extend RuntimeException
+
+@EnableJpaRepositories("com.demoapp.repos")
+@EntityScan(basePackages = {"com.demoapp.dto"})
+
+4.management endpoints were not exposed
+
+management.endpoints.web.exposure.include=* in application.properties did the trick
+
+
+
+
+
+Authentication and authorization:-
+################################
+Q.What are the 4 authentication techniques?
+
+The most common authentication methods are 
+
+1.Password Authentication Protocol (PAP)
+2.Authentication Token
+3.Symmetric-Key Authentication
+4.Biometric Authentication.
+
+Q.What is OAuth ?
+
+OAuth -> Open Authorization
+
+Provider provides the service a token with limited access to resources
+
+
+
+
+
+
+
+
+
+
+
+
+
